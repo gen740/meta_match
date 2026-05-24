@@ -1,0 +1,53 @@
+{
+  "syntax": [
+    {
+      "approach": "meta_match",
+      "mean_s": 0.7327596297800001,
+      "stddev_s": 0.0031946628732906525
+    },
+    {
+      "approach": "if_match",
+      "mean_s": 0.13892849248,
+      "stddev_s": 0.0030777512506217457
+    },
+    {
+      "approach": "glaze",
+      "mean_s": 1.17201181758,
+      "stddev_s": 0.011268308571168216
+    }
+  ],
+  "object_o1": [
+    {
+      "approach": "meta_match",
+      "mean_s": 0.903556329,
+      "stddev_s": 0.005384603076700041
+    },
+    {
+      "approach": "if_match",
+      "mean_s": 0.16801045400000003,
+      "stddev_s": 0.001778005277911253
+    },
+    {
+      "approach": "glaze",
+      "mean_s": 1.2355747165,
+      "stddev_s": 0.005482942375582511
+    }
+  ],
+  "object_o3": [
+    {
+      "approach": "meta_match",
+      "mean_s": 0.9884437148800002,
+      "stddev_s": 0.025365967121357434
+    },
+    {
+      "approach": "if_match",
+      "mean_s": 0.16963298168000002,
+      "stddev_s": 0.00176456633614471
+    },
+    {
+      "approach": "glaze",
+      "mean_s": 1.2800504484800004,
+      "stddev_s": 0.033800976824791745
+    }
+  ]
+}

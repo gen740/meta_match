@@ -1,0 +1,380 @@
+[
+  {
+    "dataset": "http_methods_10",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 2.1309082738464675
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 2.2040655053076144
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 1.3165338019920745
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 2.0293758700571436
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 2.082531672191317
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 1.278424936817033
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 5.593670313819939
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 5.405696030934191
+  },
+  {
+    "dataset": "http_methods_10",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 1.7432980995155012
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 1.6287757264994804
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 1.7058401435884192
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 1.3400637228167196
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 1.9228502399419638
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 2.029197124327496
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 1.331550178685492
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 5.8933373882285265
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 5.926901510893167
+  },
+  {
+    "dataset": "json_fields_10",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 1.1148964300914672
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 2.352225126774139
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 2.616218194849094
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 1.755108947189941
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 2.008494137310588
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 1.8611972008481474
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 0.7716027896415322
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 8.536111792195591
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 8.268850033908123
+  },
+  {
+    "dataset": "prefix_family_10",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 2.1238785791850296
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 1.5747938998295423
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 1.608685154251012
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 1.247327131264904
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 2.0671482212739543
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 2.0156358958780576
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 1.4602969115618698
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 1.841307312946386
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 1.8750259160012084
+  },
+  {
+    "dataset": "first_byte_distinct_10",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 0.6965546484993026
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 3.810123999851645
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 3.735908226321792
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 2.6923313746987483
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 2.04297492177801
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 2.073046542611806
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 1.513658517542872
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 1.8115896867227694
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 1.8520594176892113
+  },
+  {
+    "dataset": "tail_distinct_10",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 2.2461574143431084
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 3.275999640109306
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 3.2773523539200533
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 2.4314044598939457
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 2.517097289349279
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 2.6883423151410346
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 1.3503977844746655
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 5.433668140603515
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 5.401312978008199
+  },
+  {
+    "dataset": "http_headers_50",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 1.4724434105034148
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "meta_match",
+    "mode": 0,
+    "cpu_ns": 5.330447552877812
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "meta_match",
+    "mode": 1,
+    "cpu_ns": 4.1422558757881305
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "meta_match",
+    "mode": 2,
+    "cpu_ns": 2.4142810590612442
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "if_match",
+    "mode": 0,
+    "cpu_ns": 21.580716586970205
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "if_match",
+    "mode": 1,
+    "cpu_ns": 21.767245888230914
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "if_match",
+    "mode": 2,
+    "cpu_ns": 40.43888580275453
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "glaze",
+    "mode": 0,
+    "cpu_ns": 2.8046828074477697
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "glaze",
+    "mode": 1,
+    "cpu_ns": 1.9547025298053318
+  },
+  {
+    "dataset": "hash_prefix_4byte_255",
+    "approach": "glaze",
+    "mode": 2,
+    "cpu_ns": 0.8761506861556733
+  }
+]

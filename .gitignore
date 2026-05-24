@@ -1,0 +1,8 @@
+.direnv/
+venv
+
+.DS_Store
+
+*.s
+*.o
+benchmark

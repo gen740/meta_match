@@ -1,0 +1,18 @@
+CompileFlags:
+  Add:
+    - -Wall
+    - -Werror
+    - -Wextra
+    - -Wpedantic
+    - -std=c++26
+    - -nostdinc++
+    - -isystem/nix/store/fi5bbb8a9sgz79c1kl0zkfpccfyvp44j-gtest-1.17.0-dev/include
+    - -isystem/nix/store/xpa6w00q87yjgkz1vckr99p9ji2d5ajq-libcxx-21.1.8-dev/include
+    - -isystem/nix/store/72vjiylhb9ffd89p44442ivvs8wgww1q-compiler-rt-libc-21.1.8-dev/include
+    - -isystem/nix/store/xpa6w00q87yjgkz1vckr99p9ji2d5ajq-libcxx-21.1.8-dev/include/c++/v1
+    - -isystem/nix/store/01j8hzgdz042pd32ng4r0jgrpq2x16f6-clang-wrapper-21.1.8/resource-root/include
+    - -isystem/nix/store/rcqgjj8hphkhqark1ibiwfaa7yrzniz3-apple-sdk-14.4/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include
+    - -isystem/nix/store/rcqgjj8hphkhqark1ibiwfaa7yrzniz3-apple-sdk-14.4/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks (framework directory)
+    - -isystem/nix/store/jz1ih170dg8k85vn3b0r9vbi0zv1dv79-libSystem-B/include
+
+  CompilationDatabase: ./build
