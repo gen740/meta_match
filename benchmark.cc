@@ -12,6 +12,7 @@
 
 namespace {
 
+using namespace meta_match;
 using namespace std::literals;
 constexpr auto kCaseNames = std::array{
     "hits_only_randomized",

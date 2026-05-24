@@ -12,6 +12,7 @@
 
 namespace {
 
+using namespace meta_match;
 using namespace std::literals;
 using namespace frozen::string_literals;
 

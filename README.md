@@ -1,280 +1,30 @@
 # MetaMatch
 
-`meta_match` is a header-only modern C++ string dispatcher that turns a fixed key set
-into a compile-time character trie and emits direct `switch`-based code.
-
-`meta_match` itself is fundamentally a **C++20** design.[^cxx-version]
-
-[^cxx-version]: This repository builds the benchmark suite as C++23 because
-`glaze`, one of the comparison targets in this setup, requires C++23.
-
-## Summary
-
-`meta_match` is a compact compile-time trie that avoids linear scaling and has
-different failure modes from hash construction.
-
-- It compiles substantially faster than `glaze` in the current benchmark set.
-- On realistic 10-key and 50-key datasets in this repository, `meta_match`
-  stays in the low single-digit nanoseconds and usually beats `glaze`.
-- In the worst runtime cases observed when running this benchmark suite,
-  `meta_match` stays below `6 ns`.
-- The implementation remains compact: it is header-only, lives in a single file,
-  and the dispatch implementation itself stays under roughly 250 lines.
-- The strongest area is small-to-medium static key sets where the first few
-  characters eliminate most candidates and runtime stability matters more than
-  absolute best-case miss latency.
-- `meta_match` is not a universal replacement for perfect hashing. For larger
-  key sets on hash-friendly distributions, a good perfect hash such as `glaze`
-  will win on raw throughput.
-
-These numbers are not intended as a universal ranking. They describe the
-current benchmark corpus, compiler, optimization settings, and machine. The
-goal is to show the shape of the trade-off rather than claim that one dispatcher
-dominates all key distributions.
-
-## Use Cases
-
-`meta_match` fits best when the key set is fixed at compile time and dispatch
-latency matters more than universal optimality.
-
-- CLI command dispatch such as `help`, `version`, and `quit`
-- JSON / config field routing for a known schema
-- Protocol token dispatch such as HTTP methods or header names
-- Embedded or low-allocation code paths where a header-only direct dispatcher is
-  preferable to a runtime hash table
-- Small-to-medium registries where early characters separate keys well
-
-It is a weaker fit when the key set is large and hash-friendly, or when dynamic
-registration is required.
-
-## Benchmarks
-
-### Method
-
-The repository measures both compile-time and runtime.
-
-Compile-time is measured with `hyperfine`. Each implementation is compiled in
-isolation through a dedicated translation unit:
-
-- `_ct_meta.cc`
-- `_ct_if.cc`
-- `_ct_glaze.cc`
-
-Those compile-time drivers use the string set `"00"` ... `"99"`, so the compiler
-always sees exactly 100 registered keys.
-
-In the worst structural case for the trie, compile-time work grows linearly with
-the input key length because trie construction has to keep recursing until the
-distinguishing character depth.
-
-Runtime is measured with Google Benchmark against several dataset families:
-
-- `http_methods_10`: realistic short protocol tokens
-- `json_fields_10`: reflection / object field names
-- `first_byte_distinct_10`: trie-favorable early split
-- `tail_distinct_10`: trie-unfavorable late split
-- `http_headers_50`: a larger realistic 50-key set
-- `hash_prefix_4byte_255`: 255 synthetic 4-byte keys, hash-friendly distribution
-
-An additional `prefix_family_10` dataset is used to study terminal-state
-behavior separately from the main non-prefix fast path.
-
-The benchmark suite intentionally covers:
-
-- realistic keys
-- trie-favorable keys
-- trie-unfavorable keys
-- miss-heavy cases
-- a 50-key realistic set
-- a 255-key large set to observe how each approach scales
-
-The benchmarked fast path is optimized for non-prefix key sets: no registered
-key is a proper prefix of another registered key.
-
-For non-prefix key sets, `meta_match` can keep dispatching while multiple trie
-candidates remain, and then verify the final candidate with full
-`std::string_view` equality. Prefix-sharing key sets such as `set`, `setenv`,
-and `setup` require a different terminal strategy.
-
-The current implementation uses explicit terminal-state handling, so
-prefix-sharing key sets work with arbitrary `std::string_view` inputs and do
-not require null-terminated backing storage.
-
-### Runtime
-
-The runtime picture across small and medium key sets:
-
-- `meta_match` is consistently fast across all 10-case and 50-case datasets.
-- `meta_match` stays around `2.2 ns` to `4.5 ns` on the realistic 10-key and
-  50-key datasets in this suite.
-- Across all runtime datasets in the current benchmark run, `meta_match` stays
-  below `6 ns`.
-- `glaze` wins some miss-heavy or tail-distinct cases, but loses most mixed or
-  realistic cases in this suite.
-- `if_match` is very competitive for tiny sets. The compiler reduces the linear
-  fold to a size-based jump followed by 8-byte word comparisons, so individual
-  key checks are cheap. The cost grows linearly with key count, however, and
-  once the set is large enough that cost overtakes the trie or hash overhead,
-  `if_match` is no longer competitive.
-
-From `artifacts/bench_report/runtime_summary.json`:
-
-- `http_headers_50`, hits only:
-  `meta_match 4.30 ns`, `if_match 3.44 ns`, `glaze 7.06 ns`
-- `json_fields_10`, hits only:
-  `meta_match 2.22 ns`, `if_match 2.74 ns`, `glaze 8.16 ns`
-- `first_byte_distinct_10`, hits only:
-  `meta_match 2.17 ns`, `if_match 2.77 ns`, `glaze 2.53 ns`
-- `tail_distinct_10`, hits only:
-  `meta_match 5.16 ns`, `if_match 2.93 ns`, `glaze 2.54 ns`
-
-That shape matches the design:
-
-- early character separation helps `meta_match`
-- late separation helps hashing more
-- realistic 10-to-50 key sets are often favorable to `meta_match`, but
-  tail-distinct families are not
-
-#### Scaling to 255 keys
-
-The `hash_prefix_4byte_255` dataset uses 255 synthetic 4-byte keys on a
-hash-friendly distribution. Results (hits / mixed / misses):
-
-| implementation | hits     | mixed    | misses   |
-|----------------|----------|----------|----------|
-| `meta_match`   | 5.46 ns  | 5.55 ns  | 3.35 ns  |
-| `if_match`     | 29.4 ns  | 29.9 ns  | 54.9 ns  |
-| `glaze`        | 2.69 ns  | 2.68 ns  | 1.20 ns  |
-
-At 255 keys, the linear fold degrades to ~29 ns on hit paths. `meta_match` stays around 5.5 ns,
-approximately 5× faster than `if_match`, because the trie collapses the search
-space after the first few characters regardless of key count. `glaze` is the
-fastest on this distribution at ~2.7 ns, showing the expected strength of a
-well-constructed perfect hash when the key set is hash-friendly.
-
-For larger key sets, the linear fold eventually stops being competitive. Each
-key comparison is cheap — the compiler emits a size-based jump then 8-byte word
-comparisons — but those checks accumulate linearly with key count. In the
-255-key synthetic 4-byte dataset, `if_match` takes about 29 ns on hit paths,
-while `meta_match` stays around 5.5 ns because the trie prunes the candidate
-set in the first few character steps regardless of total key count. `glaze` is
-faster still on this particular distribution, around 2.7 ns, showing the
-expected strength of a good perfect-hash strategy. This is the intended
-positioning: `meta_match` is not a universal replacement for perfect hashing.
-It is a compact compile-time trie that avoids linear scaling and has different
-failure modes from hash construction.
-
-![Runtime benchmark](artifacts/bench_report/runtime_benchmark.svg)
-
-### Compile-time
-
-The compile-time result supports the main claim in the summary: `meta_match` is
-heavier than a linear fold, but clearly lighter than `glaze` in this repository.
-
-From `artifacts/bench_report/compile_summary.json`:
-
-- `-fsyntax-only`:
-  `meta_match 1.048 ± 0.013 s`, `if_match 0.198 ± 0.003 s`, `glaze 1.691 ± 0.008 s`
-- `-c -O1`:
-  `meta_match 1.273 ± 0.016 s`, `if_match 0.231 ± 0.003 s`, `glaze 1.769 ± 0.007 s`
-- `-c -O3`:
-  `meta_match 1.373 ± 0.021 s`, `if_match 0.247 ± 0.012 s`, `glaze 1.818 ± 0.019 s`
-
-So the practical reading is:
-
-- `if_match` is still the cheapest thing to compile
-- `meta_match` is the middle ground
-- `glaze` is the most expensive frontend path here
-
-![Compile-time benchmark](artifacts/bench_report/compile_time.svg)
-
-## How It Works
-
-The dispatcher is generated as a recursive compile-time trie.
-
-One practical advantage of the design is that it stays small. The implementation
-is header-only and concentrated in a single file rather than spread across a code
-generator, runtime trie structure, and auxiliary tables.
-
-At depth `N`, the implementation computes which handlers still match the byte
-at position `N`, then emits one `switch` case per ASCII byte:
-
-```cpp
-switch (static_cast<unsigned char>(c.data()[N])) {
-  case 'g': ...
-  case 's': ...
-  case 'v': ...
-}
-```
-
-For each case:
-
-1. A compile-time table gives the number of surviving candidates.
-2. If there is exactly one survivor, the code verifies the full string and calls
-   the handler directly.
-3. If there are multiple survivors, it recurses to the next character with a
-   reduced tuple of candidates.
-
-The important point is that this is not a runtime trie stored in memory. The
-trie exists as constexpr/template structure during compilation, and the runtime
-artifact is direct branch code.
-
-That is why `meta_match` is good at:
-
-- small or medium fixed key sets
-- datasets with useful early character separation
-- latency-sensitive dispatch where a few predictable branches beat hashing
-
-## Discussion
-
-`glaze` and `meta_match` solve a similar problem with very different trade-offs.
-
-`glaze` builds a compact hash-based dispatch path. In the implementation path used
-here, its `hash_info` machinery uses fixed bucketed tables, and the local source
-contains 256-entry structures in this area of the algorithm
-(`glaze/core/reflect.hpp`, e.g. `bucket_size(...) -> 256` and related 256-entry
-arrays). That is a very different shape from `meta_match`, which does not have a
-global bucket-count limit and instead grows with the actual trie frontier.
-
-This difference shows up in the benchmark suite:
-
-- `glaze` is strong when the whole key has to be considered anyway, or when the
-  key distribution is hash-friendly and the set is large
-- `meta_match` is strong when a few early characters collapse the search space,
-  and avoids linear scaling that afflicts the `if` chain at 100+ keys
-
-Another difference is robustness across pathological key families. Prefix ladders
-such as:
-
-```text
-a
-aa
-aaa
-aaaa
-...
-```
-
-are awkward for hash-based front-byte discrimination and can become hostile to
-some perfect-hash construction strategies. `meta_match` does not need a perfect
-hash at all. Its current fast implementation imposes a different constraint:
-prefix-sharing families require explicit terminal-state handling.
-
-In other words:
-
-- `glaze` is excellent when its selected hash strategy matches the key set, but
-  its performance profile depends on which compile-time hash strategy is selected
-- `meta_match` can keep a very small and direct dispatch path for non-prefix
-  key sets, and can be extended with explicit terminal handling when prefix
-  sharing matters
-
-That broader key-set support is now part of the implementation: prefix-sharing
-inputs are handled through explicit terminal-state checks on ordinary
-`std::string_view` data.
-
-## Minimal API
+`meta_match` is a header-only C++20 string dispatcher for fixed key sets.[^cxx]
+It turns declarations such as `make_handler<"help">(...)` into a compile-time
+character trie and emits `switch`-based branch code.
+
+The goal is stable low-latency dispatch without a runtime hash table and
+without the key-count scaling of a linear `if` chain.
+
+In this repository's benchmark corpus, `meta_match` stays in the low
+single-digit nanosecond range across realistic 10-key and 50-key workloads,
+wins most realistic cases against `glaze`, and keeps runtime tightly bounded
+across favorable, unfavorable, miss-heavy, prefix-sharing, and larger synthetic
+datasets. Across all rows in
+[`artifacts/bench_report/runtime_summary.json`](artifacts/bench_report/runtime_summary.json),
+the worst observed `meta_match` result is `5.65 ns`.
+
+[^cxx]: `meta_match` itself is a C++20 design. The benchmark suite is built as
+    C++23 because `glaze`, one of the comparison targets in this setup,
+    requires C++23.
+
+## Quick Example
 
 ```cpp
 #include "meta_match.hh"
+
+using namespace meta_match;
 
 auto handlers = std::tuple{
     make_handler<"help">([] { show_help(); }),
@@ -285,7 +35,211 @@ auto handlers = std::tuple{
 bool ok = match(input, handlers);
 ```
 
-## Build
+## Why `meta_match`?
+
+Use `meta_match` when the string set is fixed and dispatch latency should stay
+predictable across inputs and key distributions.
+
+- Header-only C++20.
+- No runtime hash table.
+- No generated source file.
+- Direct `switch`-based branch code.
+- Avoids scanning every registered key.
+- Does not rely on a hash layout being favorable to the key set.
+- Stable low-nanosecond behavior on the benchmarked realistic datasets.
+- Reproducible benchmark artifacts are included in the repository.
+
+## Performance Profile
+
+`meta_match` is optimized for consistency across fixed key sets, not for one
+idealized distribution.
+
+A linear matcher can be excellent for tiny key sets, but it accumulates work as
+the number of keys grows. A perfect hash can be extremely fast when the key set
+maps well to the selected hash strategy, but its result depends on that
+construction. `meta_match` takes a different path: it narrows the candidate set
+through compile-time trie branches and verifies the final candidate with full
+string equality.
+
+In the current benchmark corpus, this produces a strong stability profile:
+`meta_match` remains below `5.65 ns` across all rows in
+[`artifacts/bench_report/runtime_summary.json`](artifacts/bench_report/runtime_summary.json),
+while still winning most realistic small-to-medium hit-path cases.
+
+## Benchmark Highlights
+
+In the current benchmark run:
+
+- On realistic 10-key and 50-key datasets, `meta_match` stays in the low
+  single-digit nanosecond range.
+- On `json_fields_10`, `meta_match` is faster than both `if_match` and `glaze`
+  on hits: `2.22 ns` vs `3.86 ns` vs `7.79 ns`.
+- On `http_headers_50`, `meta_match` is faster than both comparison targets on
+  hits: `4.40 ns` vs `5.06 ns` vs `7.06 ns`.
+- On `tail_distinct_10`, the trie-unfavorable case, `meta_match` is slower than
+  the best hash or linear result but still remains at `5.22 ns` on hits.
+- On `hash_prefix_4byte_255`, `meta_match` avoids the large linear slowdown of
+  `if_match`, while `glaze` wins on raw throughput.
+- Across all rows in `runtime_summary.json`, the worst observed runtime is
+  `5.65 ns` for `meta_match`, `10.89 ns` for `glaze`, and `55.03 ns` for
+  `if_match`.
+
+## Runtime Results
+
+Representative hit-path rows from
+[`artifacts/bench_report/runtime_summary.json`](artifacts/bench_report/runtime_summary.json):
+
+| dataset | `meta_match` | `if_match` | `glaze` | interpretation |
+|---|---:|---:|---:|---|
+| `json_fields_10` | 2.22 ns | 3.86 ns | 7.79 ns | realistic 10-key field dispatch |
+| `http_headers_50` | 4.40 ns | 5.06 ns | 7.06 ns | realistic 50-key header dispatch |
+| `first_byte_distinct_10` | 2.20 ns | 2.74 ns | 2.53 ns | early split |
+| `tail_distinct_10` | 5.22 ns | 3.07 ns | 2.56 ns | late split, trie-unfavorable |
+| `hash_prefix_4byte_255` | 5.65 ns | 29.52 ns | 3.26 ns | large hash-friendly set |
+
+The important result is not only which row has the absolute minimum. The
+important result is the spread. `meta_match` stays within a narrow
+low-nanosecond band across favorable, realistic, and unfavorable cases. The
+linear matcher has excellent tiny-set behavior but degrades at 255 keys.
+`glaze` has excellent hash-friendly behavior but is slower on several realistic
+small-to-medium cases in this corpus.
+
+### Worst Observed Runtime in This Benchmark Summary
+
+The following table is computed across all rows in
+[`artifacts/bench_report/runtime_summary.json`](artifacts/bench_report/runtime_summary.json),
+using the same row set for all three implementations.
+
+| implementation | worst observed runtime |
+|---|---:|
+| `meta_match` | 5.65 ns |
+| `glaze` | 10.89 ns |
+| `if_match` | 55.03 ns |
+
+![Runtime benchmark](artifacts/bench_report/runtime_benchmark.svg)
+
+## Compile-Time Results
+
+`meta_match` is more expensive to compile than a linear fold, but it is
+substantially cheaper than `glaze` in the measured compile-time setup. This is
+part of the intended trade-off: direct dispatch with stronger runtime scaling
+than a linear chain, without paying the full compile-time cost observed for the
+hash-based comparison target.
+
+Values below are taken from
+[`artifacts/bench_report/compile_summary.json`](artifacts/bench_report/compile_summary.json).
+
+| mode | `meta_match` | `if_match` | `glaze` |
+|---|---:|---:|---:|
+| `-fsyntax-only` | 1.101 ± 0.009 s | 0.208 ± 0.002 s | 1.802 ± 0.011 s |
+| `-c -O1` | 1.372 ± 0.025 s | 0.251 ± 0.008 s | 1.962 ± 0.030 s |
+| `-c -O3` | 1.434 ± 0.015 s | 0.256 ± 0.002 s | 1.979 ± 0.156 s |
+
+![Compile-time benchmark](artifacts/bench_report/compile_time.svg)
+
+## Methodology / Reproducibility
+
+Runtime is measured with Google Benchmark. Compile-time is measured with
+`hyperfine`.
+
+The benchmark compares three dispatch strategies over the same key sets and
+runtime input sequences.
+
+### `meta_match`
+
+`meta_match` takes the complete key set as a compile-time tuple of handlers. At
+compile time, those keys are represented as a character trie. The runtime path
+is then emitted as direct `switch`-based branch code rather than as a runtime
+trie object or hash table.
+
+Operationally, the dispatch path works in three stages:
+
+1. At depth `N`, inspect the runtime byte at position `N`.
+2. Narrow the candidate set to only the keys that still match at that depth.
+3. If one candidate remains, verify the full string and invoke its handler; if
+   several remain, recurse to the next depth with the reduced candidate set.
+
+This means that the trie exists in the type and constexpr layer during
+compilation, while the runtime artifact is ordinary branch code plus one final
+string equality check on the selected candidate. Duplicate keys are rejected at
+compile time when the corresponding terminal trie state is instantiated.
+
+The benchmark implementation also accepts arbitrary `std::string_view` inputs,
+including non-null-terminated buffers and prefix-sharing key families.
+
+### `if_match`
+
+`if_match` is the linear baseline. It checks the input string against the
+registered keys through a short-circuit chain of equality comparisons and
+invokes the first matching handler.
+
+This approach is important because it is simple, cheap to compile, and often
+surprisingly strong at very small key counts. Modern compilers can make
+individual equality checks inexpensive. The trade-off is accumulation: the
+number of candidate checks still grows with the size of the registered key set.
+
+### `glaze`
+
+`glaze` is the hash-based comparison target. In this setup it uses a
+compile-time perfect-hash-style approach that searches for a mapping from keys
+to unique indices and dispatches through that index.
+
+The important point for this README is not the internal mechanics of that
+search, but the resulting trade-off. When the key set is favorable to the
+selected construction, the measured runtime can be excellent. The comparison is
+therefore not trie versus a weak baseline; it is trie dispatch against a strong
+static-dispatch strategy with different strengths.
+
+### Runtime Workload
+
+Runtime measurements are taken with Google Benchmark over precomputed input
+sequences. For each dataset, the benchmark builds three workload modes:
+
+- hits only: successful lookups only, in randomized order
+- hit/miss mixed: a mixture of successful and unsuccessful lookups
+- misses only: unsuccessful lookups only
+
+The benchmark driver feeds the same sequence shape to each implementation for a
+given dataset and mode. This keeps the comparison aligned across
+`meta_match`, `if_match`, and `glaze`.
+
+The current runtime corpus includes:
+
+- `http_methods_10`
+- `json_fields_10`
+- `first_byte_distinct_10`
+- `tail_distinct_10`
+- `http_headers_50`
+- `hash_prefix_4byte_255`
+- `prefix_family_10`
+
+These datasets are intentionally mixed. Some are realistic protocol or schema
+tables, some are favorable to early trie separation, some are unfavorable, and
+some are synthetic scale tests.
+
+### Compile-Time Workload
+
+Compile-time is measured with `hyperfine`, with each implementation built in
+isolation through a dedicated translation unit:
+
+Each compile-time comparison is built in isolation through:
+
+- `_ct_meta.cc`
+- `_ct_if.cc`
+- `_ct_glaze.cc`
+
+Those compile-time drivers use the key set `"00"` through `"99"`, so the
+compiler always sees exactly 100 keys. The reported compile-time modes cover
+frontend-only work (`-fsyntax-only`) as well as object generation (`-c -O1` and
+`-c -O3`).
+
+This split matters for interpretation. It shows not only whether one approach
+is expensive in a fully optimized build, but also whether the template and
+constexpr front-end cost already differs before code generation is included.
+
+### Reproducing the Results
+
+To reproduce the results:
 
 ```sh
 nix develop
@@ -295,5 +249,67 @@ make compile-time
 make bench-report
 ```
 
-`make bench-report` writes the JSON summaries and SVG graphs to
-[`artifacts/bench_report`](artifacts/bench_report).
+Important generated artifacts:
+
+```text
+artifacts/bench_report/runtime_summary.json
+artifacts/bench_report/compile_summary.json
+artifacts/bench_report/runtime_benchmark.svg
+artifacts/bench_report/compile_time.svg
+```
+
+## Discussion
+
+### Stable Latency Is the Main Result
+
+The benchmark suite includes favorable, unfavorable, realistic, miss-heavy,
+prefix-sharing, and larger synthetic key sets. Across that spread,
+`meta_match` remains in a narrow runtime band. That is the central design
+result: the trie avoids the key-count accumulation of a linear chain and does
+not depend on finding a particularly good hash layout.
+
+### Realistic Small-to-Medium Sets Are the Target
+
+The realistic 10-key and 50-key datasets are where the library is positioned.
+In this corpus, `meta_match` wins the representative `json_fields_10` and
+`http_headers_50` hit-path rows against both baselines, and remains comfortably
+in low single-digit nanoseconds.
+
+### Worst-Case Behavior Matters
+
+Peak best-case numbers are only part of the story. Across the full
+`runtime_summary.json` row set, `meta_match` has the strongest worst observed
+runtime of the three measured implementations: `5.65 ns`, versus `10.89 ns`
+for `glaze` and `55.03 ns` for `if_match`. In this repository, the main value
+of the trie is not just that it can win particular rows; it is that it keeps
+dispatch tightly bounded across many different rows.
+
+### Perfect Hashing Is a Strong Baseline, Not the Whole Story
+
+The large synthetic hash-friendly dataset is a good demonstration of where
+perfect hashing should do well. It is useful evidence, but it should not be the
+only lens for evaluating static string dispatch. The realistic 10-key and
+50-key datasets show a different shape, where `meta_match` is consistently
+competitive and often faster.
+
+### Linear Matching Is a Good Tiny-Set Baseline, but It Scales Linearly
+
+The linear matcher is a serious baseline for tiny sets. The compiler can make
+individual string checks cheap. The issue is accumulation: as the key count
+grows, the chain still has more candidates to reject. The 255-key dataset makes
+that cost visible directly.
+
+## Limitations
+
+The benchmark results are measurements of this repository's corpus, compiler,
+flags, and machine. They should not be read as architecture-independent
+absolute numbers.
+
+`meta_match` is designed for fixed key sets known at compile time. It is not a
+dynamic registry and does not replace runtime maps when keys are added at
+runtime.
+
+Perfect hashing remains a strong choice for large hash-friendly distributions.
+The point of `meta_match` is not to beat every perfect hash on every possible
+key set; it is to provide consistently fast direct dispatch across ordinary
+static key sets with simple integration and reproducible behavior.

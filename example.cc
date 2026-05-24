@@ -15,6 +15,7 @@
 
 #include "meta_match.hh"
 
+using namespace meta_match;
 using namespace std::literals;
 
 // ---------------------------------------------------------------------------

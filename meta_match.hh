@@ -29,6 +29,16 @@
 #include <type_traits>
 #include <utility>
 
+#if defined(_MSC_VER)
+#define META_MATCH_ALWAYS_INLINE __forceinline
+#elif defined(__GNUC__) || defined(__clang__)
+#define META_MATCH_ALWAYS_INLINE inline __attribute__((always_inline))
+#else
+#define META_MATCH_ALWAYS_INLINE inline
+#endif
+
+namespace meta_match {
+
 // ============================================================================
 // StringLiteral — compile-time string usable as a non-type template parameter
 // ============================================================================
@@ -86,12 +96,6 @@ struct StringLiteral {
 template <std::size_t N>
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 StringLiteral(const char (&)[N]) -> StringLiteral<N>;
-
-/** User-defined literal: `"foo"_sl` → `StringLiteral<4>{"foo"}`. */
-template <StringLiteral Str>
-[[nodiscard]] consteval auto operator""_sl() noexcept {
-  return Str;
-}
 
 // ============================================================================
 // Handler<Key, Fn> — a key–callable pair usable as an element of match()
@@ -151,8 +155,8 @@ template <StringLiteral Key, class Fn>
 
 // Forward declaration of the ref-tuple overload (used recursively).
 template <std::size_t N, class... Entries>
-inline __attribute__((always_inline)) auto match(std::string_view c,
-                                                 std::tuple<Entries&...> a)
+META_MATCH_ALWAYS_INLINE auto match(std::string_view c,
+                                    std::tuple<Entries&...> a)
     -> bool;
 
 /**
@@ -160,6 +164,7 @@ inline __attribute__((always_inline)) auto match(std::string_view c,
  *
  * Accepts an lvalue reference to a `std::tuple` of `Handler` objects,
  * wraps them in references, and starts trie traversal at position 0.
+ * A temporary tuple is also accepted through the rvalue overload below.
  *
  * @param c  Runtime string to match.
  * @param a  Tuple of `Handler<Key, Fn>` instances (created via `make_handler`).
@@ -175,8 +180,17 @@ inline __attribute__((always_inline)) auto match(std::string_view c,
  * @endcode
  */
 template <class... Entries>
-inline __attribute__((always_inline)) auto match(std::string_view c,
-                                                 std::tuple<Entries...>& a)
+META_MATCH_ALWAYS_INLINE auto match(std::string_view c,
+                                    std::tuple<Entries...>& a)
+    -> bool {
+  auto refs = std::apply(
+      [](auto&... xs) -> auto { return std::forward_as_tuple(xs...); }, a);
+  return match<0>(c, refs);
+}
+
+template <class... Entries>
+META_MATCH_ALWAYS_INLINE auto match(std::string_view c,
+                                    std::tuple<Entries...>&& a)
     -> bool {
   auto refs = std::apply(
       [](auto&... xs) -> auto { return std::forward_as_tuple(xs...); }, a);
@@ -221,8 +235,8 @@ constexpr auto get_next_candidates(std::tuple<Entries&...> a) {
  * Not called directly; use the value-tuple `match()` overload above.
  */
 template <std::size_t N, class... Entries>
-inline __attribute__((always_inline)) auto match(std::string_view c,
-                                                 std::tuple<Entries&...> a)
+META_MATCH_ALWAYS_INLINE auto match(std::string_view c,
+                                    std::tuple<Entries&...> a)
     -> bool {
   constexpr auto matched_number_table = [] -> auto {
     std::array<std::size_t, 0x7f + 1> result{};
@@ -240,6 +254,8 @@ inline __attribute__((always_inline)) auto match(std::string_view c,
     if constexpr (matched_number == 0) {
       return false;
     } else {
+      // Duplicate keys are rejected at compile time when the corresponding trie
+      // terminal state is instantiated.
       static_assert(matched_number == 1, "duplicated meta::match key");
 
       bool called = false;
@@ -326,3 +342,5 @@ inline __attribute__((always_inline)) auto match(std::string_view c,
 #undef MM_SWITCH_CHAR
   return false;
 }
+
+}  // namespace meta_match
