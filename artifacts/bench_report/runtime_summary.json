@@ -3,378 +3,378 @@
     "dataset": "http_methods_10",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 2.1309082738464675
+    "cpu_ns": 2.976768152832899
   },
   {
     "dataset": "http_methods_10",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 2.2040655053076144
+    "cpu_ns": 2.9760382947749173
   },
   {
     "dataset": "http_methods_10",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 1.3165338019920745
+    "cpu_ns": 1.8209018429251855
   },
   {
     "dataset": "http_methods_10",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 2.0293758700571436
+    "cpu_ns": 2.6371680750816062
   },
   {
     "dataset": "http_methods_10",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 2.082531672191317
+    "cpu_ns": 2.803525544206082
   },
   {
     "dataset": "http_methods_10",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 1.278424936817033
+    "cpu_ns": 1.7096492664633296
   },
   {
     "dataset": "http_methods_10",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 5.593670313819939
+    "cpu_ns": 7.700371236827673
   },
   {
     "dataset": "http_methods_10",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 5.405696030934191
+    "cpu_ns": 7.5350446320141495
   },
   {
     "dataset": "http_methods_10",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 1.7432980995155012
+    "cpu_ns": 2.49773090929728
   },
   {
     "dataset": "json_fields_10",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 1.6287757264994804
+    "cpu_ns": 2.220926154714487
   },
   {
     "dataset": "json_fields_10",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 1.7058401435884192
+    "cpu_ns": 2.3353330434333732
   },
   {
     "dataset": "json_fields_10",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 1.3400637228167196
+    "cpu_ns": 1.8116519071315296
   },
   {
     "dataset": "json_fields_10",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 1.9228502399419638
+    "cpu_ns": 3.860755525105759
   },
   {
     "dataset": "json_fields_10",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 2.029197124327496
+    "cpu_ns": 3.8440595135646696
   },
   {
     "dataset": "json_fields_10",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 1.331550178685492
+    "cpu_ns": 1.8335626663430507
   },
   {
     "dataset": "json_fields_10",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 5.8933373882285265
+    "cpu_ns": 7.793274541590511
   },
   {
     "dataset": "json_fields_10",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 5.926901510893167
+    "cpu_ns": 7.610050465504278
   },
   {
     "dataset": "json_fields_10",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 1.1148964300914672
+    "cpu_ns": 1.5376416854783288
   },
   {
     "dataset": "prefix_family_10",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 2.352225126774139
+    "cpu_ns": 3.303443302078424
   },
   {
     "dataset": "prefix_family_10",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 2.616218194849094
+    "cpu_ns": 3.380154051012725
   },
   {
     "dataset": "prefix_family_10",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 1.755108947189941
+    "cpu_ns": 2.3550571027604446
   },
   {
     "dataset": "prefix_family_10",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 2.008494137310588
+    "cpu_ns": 2.7357604861792817
   },
   {
     "dataset": "prefix_family_10",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 1.8611972008481474
+    "cpu_ns": 2.719460693117716
   },
   {
     "dataset": "prefix_family_10",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 0.7716027896415322
+    "cpu_ns": 1.0571575778067066
   },
   {
     "dataset": "prefix_family_10",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 8.536111792195591
+    "cpu_ns": 10.891671239054638
   },
   {
     "dataset": "prefix_family_10",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 8.268850033908123
+    "cpu_ns": 10.466775970239203
   },
   {
     "dataset": "prefix_family_10",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 2.1238785791850296
+    "cpu_ns": 2.9116139414572864
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 1.5747938998295423
+    "cpu_ns": 2.2037887016082465
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 1.608685154251012
+    "cpu_ns": 2.2505434476033632
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 1.247327131264904
+    "cpu_ns": 1.777549468814034
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 2.0671482212739543
+    "cpu_ns": 2.7432499113673323
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 2.0156358958780576
+    "cpu_ns": 2.760344157258547
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 1.4602969115618698
+    "cpu_ns": 2.023948350126812
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 1.841307312946386
+    "cpu_ns": 2.532781745508964
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 1.8750259160012084
+    "cpu_ns": 2.604091869904008
   },
   {
     "dataset": "first_byte_distinct_10",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 0.6965546484993026
+    "cpu_ns": 0.9612620145892582
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 3.810123999851645
+    "cpu_ns": 5.217119418759727
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 3.735908226321792
+    "cpu_ns": 5.118786956358998
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 2.6923313746987483
+    "cpu_ns": 3.6979159831488913
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 2.04297492177801
+    "cpu_ns": 3.071987049327978
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 2.073046542611806
+    "cpu_ns": 3.190806910033614
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 1.513658517542872
+    "cpu_ns": 2.1689472014691793
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 1.8115896867227694
+    "cpu_ns": 2.5577000061154584
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 1.8520594176892113
+    "cpu_ns": 2.6224105946790983
   },
   {
     "dataset": "tail_distinct_10",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 2.2461574143431084
+    "cpu_ns": 1.2751866296374392
   },
   {
     "dataset": "http_headers_50",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 3.275999640109306
+    "cpu_ns": 4.398262316037789
   },
   {
     "dataset": "http_headers_50",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 3.2773523539200533
+    "cpu_ns": 4.543614404522308
   },
   {
     "dataset": "http_headers_50",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 2.4314044598939457
+    "cpu_ns": 3.4872823081958657
   },
   {
     "dataset": "http_headers_50",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 2.517097289349279
+    "cpu_ns": 5.0554203353506955
   },
   {
     "dataset": "http_headers_50",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 2.6883423151410346
+    "cpu_ns": 5.2260906716774205
   },
   {
     "dataset": "http_headers_50",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 1.3503977844746655
+    "cpu_ns": 3.6673469175461815
   },
   {
     "dataset": "http_headers_50",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 5.433668140603515
+    "cpu_ns": 7.0619265270632
   },
   {
     "dataset": "http_headers_50",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 5.401312978008199
+    "cpu_ns": 7.125719124197375
   },
   {
     "dataset": "http_headers_50",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 1.4724434105034148
+    "cpu_ns": 2.01687453035713
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "meta_match",
     "mode": 0,
-    "cpu_ns": 5.330447552877812
+    "cpu_ns": 5.6538252791066315
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "meta_match",
     "mode": 1,
-    "cpu_ns": 4.1422558757881305
+    "cpu_ns": 5.512490777237846
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "meta_match",
     "mode": 2,
-    "cpu_ns": 2.4142810590612442
+    "cpu_ns": 3.3632870612453516
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "if_match",
     "mode": 0,
-    "cpu_ns": 21.580716586970205
+    "cpu_ns": 29.52140473448168
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "if_match",
     "mode": 1,
-    "cpu_ns": 21.767245888230914
+    "cpu_ns": 29.965736625704057
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "if_match",
     "mode": 2,
-    "cpu_ns": 40.43888580275453
+    "cpu_ns": 55.028770889648044
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "glaze",
     "mode": 0,
-    "cpu_ns": 2.8046828074477697
+    "cpu_ns": 3.260469481324121
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "glaze",
     "mode": 1,
-    "cpu_ns": 1.9547025298053318
+    "cpu_ns": 3.0772156063093306
   },
   {
     "dataset": "hash_prefix_4byte_255",
     "approach": "glaze",
     "mode": 2,
-    "cpu_ns": 0.8761506861556733
+    "cpu_ns": 0.9819464494843261
   }
 ]

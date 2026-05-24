@@ -23,19 +23,20 @@ constexpr std::size_t kSequenceSize = 1024;
 constexpr int kModes = static_cast<int>(kCaseNames.size() - 1);
 
 template <std::size_t N>
-consteval auto nt_sv(const char (&str)[N]) -> std::string_view {
+consteval auto literal_sv(const char (&str)[N]) -> std::string_view {
   return {str, N - 1};
 }
 
 template <std::size_t N>
-consteval auto all_null_terminated(const std::array<std::string_view, N>& values)
-    -> bool {
+consteval auto max_sv_size(const std::array<std::string_view, N>& values)
+    -> std::size_t {
+  std::size_t max_size = 0;
   for (const auto value : values) {
-    if (value.data()[value.size()] != '\0') {
-      return false;
+    if (value.size() > max_size) {
+      max_size = value.size();
     }
   }
-  return true;
+  return max_size;
 }
 
 // ============================================================================
@@ -427,7 +428,7 @@ struct BenchFn {
   X(253, "E1CD")                 \
   X(254, "97AA")
 
-#define COMMAND_AS_SV(_, literal) nt_sv(literal),
+#define COMMAND_AS_SV(_, literal) literal_sv(literal),
 #define COMMAND_AS_HANDLER(_, literal) make_handler<literal>(BenchFn<literal>{}),
 #define COMMAND_AS_CASE(index, literal) \
   case index:                           \
@@ -440,9 +441,12 @@ struct BenchFn {
     inline static constexpr std::array<std::string_view, kN> kCommands{        \
         ListMacro(COMMAND_AS_SV)};                                             \
     inline static constexpr std::array<std::string_view, 4> kMissValues{       \
-        nt_sv(Miss0), nt_sv(Miss1), nt_sv(Miss2), nt_sv(Miss3)};               \
-    static_assert(all_null_terminated(kCommands));                             \
-    static_assert(all_null_terminated(kMissValues));                           \
+        literal_sv(Miss0), literal_sv(Miss1), literal_sv(Miss2),               \
+        literal_sv(Miss3)};                                                    \
+    inline static constexpr std::size_t kMaxInputSize =                        \
+        max_sv_size(kCommands) > max_sv_size(kMissValues)                      \
+            ? max_sv_size(kCommands)                                           \
+            : max_sv_size(kMissValues);                                        \
                                                                                \
     using commands_t = decltype(std::tuple{ListMacro(COMMAND_AS_HANDLER)});    \
                                                                                \
@@ -490,23 +494,41 @@ DEFINE_DATASET(HashPrefix4byte255, 255, HASH_PREFIX_4byte_255, "CE1A", "1A3F",
 }
 
 template <class Dataset>
+struct BenchInput {
+  std::array<char, Dataset::kMaxInputSize + 1> storage{};
+  std::uint8_t size = 0;
+
+  void assign(std::string_view value) {
+    size = static_cast<std::uint8_t>(value.size());
+    for (std::size_t i = 0; i < value.size(); ++i) {
+      storage[i] = value[i];
+    }
+    storage[value.size()] = '\x7f';
+  }
+
+  [[nodiscard]] auto view() const -> std::string_view {
+    return {storage.data(), size};
+  }
+};
+
+template <class Dataset>
 [[nodiscard]] auto make_sequence(int mode)
-    -> std::array<std::string_view, kSequenceSize> {
-  std::array<std::string_view, kSequenceSize> seq{};
+    -> std::array<BenchInput<Dataset>, kSequenceSize> {
+  std::array<BenchInput<Dataset>, kSequenceSize> seq{};
   std::uint64_t rng = 0x9e3779b97f4a7c15ULL +
                       static_cast<std::uint64_t>(mode) * 0xbf58476d1ce4e5b9ULL;
 
   for (auto& entry : seq) {
     const auto val = next_random(rng);
     if (mode == 0) {
-      entry = Dataset::kCommands[val % Dataset::kN];
+      entry.assign(Dataset::kCommands[val % Dataset::kN]);
     } else if (mode == 2) {
-      entry = Dataset::kMissValues[val % Dataset::kMissValues.size()];
+      entry.assign(Dataset::kMissValues[val % Dataset::kMissValues.size()]);
     } else {
       const auto idx = val % (Dataset::kN + 1);
-      entry = (idx == Dataset::kN)
-                  ? Dataset::kMissValues[val % Dataset::kMissValues.size()]
-                  : Dataset::kCommands[idx];
+      entry.assign((idx == Dataset::kN)
+                       ? Dataset::kMissValues[val % Dataset::kMissValues.size()]
+                       : Dataset::kCommands[idx]);
     }
   }
   return seq;
@@ -589,7 +611,7 @@ void bench(benchmark::State& state) {
   std::size_t index = 0;
 
   for (auto _ : state) {
-    Runner<Dataset>::run(sequence[index], commands);
+    Runner<Dataset>::run(sequence[index].view(), commands);
     benchmark::ClobberMemory();
     index = (index + 1) % sequence.size();
   }

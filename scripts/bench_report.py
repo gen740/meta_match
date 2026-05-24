@@ -307,10 +307,12 @@ def render_compile_svg(results: dict[str, list[CompileResult]], out_path: Path) 
 def render_runtime_svg(results: list[RuntimeResult], out_path: Path) -> None:
     datasets = sorted({result.dataset for result in results})
     width = 1180
-    panel_height = 340
+    panel_height = 392
     margin_left = 220
     margin_right = 60
     chart_width = width - margin_left - margin_right
+    legend_gap = 34
+    display_max_ns = 15.0
     body: list[str] = [
         '<rect width="100%" height="100%" fill="#fffdf8"/>',
         '<text x="24" y="34" font-size="22" font-weight="700" fill="#111827">Runtime benchmark (CPU time)</text>',
@@ -324,23 +326,27 @@ def render_runtime_svg(results: list[RuntimeResult], out_path: Path) -> None:
 
     for panel_index, mode in enumerate(mode_keys):
         top = 60 + panel_index * panel_height
-        chart_top = top + 30
+        chart_top = top + 44
         row_group = 42
+        chart_bottom = chart_top + row_group * len(datasets)
+        legend_y = chart_bottom + legend_gap
         body.append(
             f'<text x="24" y="{top}" font-size="16" font-weight="700" fill="#1f2937">{escape_xml(MODE_LABELS[mode])}</text>'
         )
 
-        max_value = max(runtime_map[(dataset, approach, mode)] for dataset in datasets for approach in APPROACH_ORDER)
-        for tick in range(6):
-            ratio = tick / 5 if max_value else 0.0
-            value = max_value * ratio
+        body.append(
+            f'<line x1="{margin_left:.1f}" y1="{chart_top - 12}" x2="{margin_left + chart_width:.1f}" y2="{chart_top - 12}" '
+            'stroke="#e5e7eb" stroke-width="1"/>'
+        )
+        for guide in range(0, int(display_max_ns) + 1, 3):
+            ratio = guide / display_max_ns
             x = margin_left + chart_width * ratio
             body.append(
-                f'<line x1="{x:.1f}" y1="{chart_top - 10}" x2="{x:.1f}" y2="{chart_top + row_group * len(datasets)}" '
-                'stroke="#e5e7eb" stroke-width="1"/>'
+                f'<line x1="{x:.1f}" y1="{chart_top - 12}" x2="{x:.1f}" y2="{chart_bottom}" '
+                'stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 4"/>'
             )
             body.append(
-                f'<text x="{x:.1f}" y="{chart_top - 16}" font-size="11" text-anchor="middle" fill="#6b7280">{format_ns(value)}</text>'
+                f'<text x="{x:.1f}" y="{chart_top - 18}" font-size="11" text-anchor="middle" fill="#475569">{guide:.0f} ns</text>'
             )
 
         for dataset_index, dataset in enumerate(datasets):
@@ -352,17 +358,19 @@ def render_runtime_svg(results: list[RuntimeResult], out_path: Path) -> None:
                 value = runtime_map[(dataset, approach, mode)]
                 y = group_y + approach_index * 8
                 bar_height = 6
-                bar_width = 0.0 if max_value == 0 else chart_width * (value / max_value)
+                visible_value = min(value, display_max_ns)
+                bar_width = 0.0 if display_max_ns == 0 else chart_width * (visible_value / display_max_ns)
                 body.append(
                     f'<rect x="{margin_left}" y="{y}" width="{bar_width:.1f}" height="{bar_height}" '
                     f'fill="{APPROACH_COLORS[approach]}" rx="3"/>'
                 )
-                if approach_index == 0:
-                    pass
-            legend_y = chart_top + row_group * len(datasets) + 18
+                if value > display_max_ns:
+                    body.append(
+                        f'<text x="{margin_left + chart_width + 8:.1f}" y="{y + 5}" font-size="11" fill="#374151">{format_ns(value)}</text>'
+                    )
         for index, approach in enumerate(APPROACH_ORDER):
             lx = 24 + index * 170
-            ly = chart_top + row_group * len(datasets) + 20
+            ly = legend_y
             body.append(
                 f'<rect x="{lx}" y="{ly - 10}" width="18" height="10" fill="{APPROACH_COLORS[approach]}" rx="2"/>'
             )
